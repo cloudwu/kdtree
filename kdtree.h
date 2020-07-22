@@ -17,7 +17,7 @@ struct kdtree {
 };
 
 void kdtree_build(struct kdtree *space, int n, struct boundingbox *aabbs);
-int kdtree_insert(struct kdtree *space, const struct boundingbox *aabb);
+int kdtree_insert(struct kdtree *space, const struct boundingbox *aabb, int index);
 const struct boundingbox * kdtree_box(struct kdtree *space, int index);
 void kdtree_range(struct kdtree *space, int index, int *from_index, int *to_index);
 

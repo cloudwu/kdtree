@@ -187,10 +187,28 @@ kdtree_build(struct kdtree *space, int n, struct boundingbox *aabbs) {
 	memset(space->box, 0, maxslots * sizeof(struct boundingbox));
 }
 
+static int inline
+contain(const struct boundingbox *c, const struct boundingbox *b) {
+	return b->minp[0] >= c->minp[0]
+		&& b->minp[1] >= c->minp[1]
+		&& b->minp[2] >= c->minp[2]
+		&& b->maxp[0] <= c->maxp[0]
+		&& b->maxp[1] <= c->maxp[1]
+		&& b->maxp[2] <= c->maxp[2];
+}
+
 int
-kdtree_insert(struct kdtree *space, const struct boundingbox *aabb) {
+kdtree_insert(struct kdtree *space, const struct boundingbox *aabb, int index) {
 	int maxslots = (1 << space->depth) - 1;
-	int slot = 0;
+	int slot = index;
+	while (slot > 0) {
+		if (contain(&space->box[slot], aabb)) {
+			if (slot * 2 >= maxslots)
+				return slot;
+			break;
+		}
+		slot = (slot - 1) / 2;
+	}
 	while (slot * 2 < maxslots) {
 		float split = space->split[slot];
 		int direction = get_direction(split);
@@ -245,7 +263,7 @@ int main() {
 	struct boundingbox tmp = {
 		{ 1,1,1 }, {2,2,2},
 	};
-	printf("Insert %d\n", kdtree_insert(&space, &tmp));
+	printf("Insert %d\n", kdtree_insert(&space, &tmp, 0));
 
 	for (i=0;i<slots;i++) {
 		print_aabb(&space.box[i]);
